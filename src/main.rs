@@ -1,7 +1,13 @@
 use std::collections::HashMap;
-#[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process;
 use colored::Colorize;
+
+fn exit(_arg0: &str, args: &[&str]) -> u8 {
+    let exit_code = args.get(0).unwrap_or(&"0");
+    let exit_code = exit_code.parse::<i32>().unwrap_or(0);
+    process::exit(exit_code);
+}
 
 fn main() {
     let mut commands: HashMap<String, fn(&str, &[&str]) -> u8> = HashMap::new();
@@ -10,6 +16,8 @@ fn main() {
         println!("Hello, World!");
         return 0;
     });
+
+    commands.insert(String::from("exit"), exit);
 
     loop {
         print!("$ ");
