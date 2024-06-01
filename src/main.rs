@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::{env, process};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use colored::Colorize;
 
@@ -18,7 +18,7 @@ fn echo(_arg0: &str, args: &[&str]) -> u8 {
 }
 
 fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
-    let builtins = vec!["exit", "echo", "type", "pwd"];
+    let builtins = vec!["exit", "echo", "type", "pwd", "cd"];
 
     return if let Some(command) = args.get(0) {
         if builtins.contains(command) {
@@ -39,6 +39,20 @@ fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
 fn pwd(_arg0: &str, _args: &[&str]) -> u8 {
     println!("{}", env::current_dir().unwrap().into_os_string().into_string().unwrap());
     return 0;
+}
+
+fn cd(arg0: &str, args: &[&str]) -> u8 {
+    if let Some(path) = args.get(0) {
+        let path = Path::new(path);
+        if let Err(_err) = env::set_current_dir(&path) {
+            eprintln!("{}: No such {} or directory", path.to_str().unwrap(), "file".red());
+            return 1;
+        }
+        0
+    } else {
+        eprintln!("Usage: {} <directory>", arg0);
+        1
+    }
 }
 
 fn get_command_path(command: &&str) -> Option<PathBuf> {
@@ -75,6 +89,7 @@ fn main() {
     commands.insert(String::from("echo"), echo);
     commands.insert(String::from("type"), type_builtin);
     commands.insert(String::from("pwd"), pwd);
+    commands.insert(String::from("cd"), cd);
 
     loop {
         print!("$ ");
