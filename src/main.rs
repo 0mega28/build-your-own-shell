@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::{self, Write};
-use std::process;
+use std::{env, process};
+use std::path::PathBuf;
 use colored::Colorize;
 
 fn exit(_arg0: &str, args: &[&str]) -> u8 {
@@ -15,6 +16,38 @@ fn echo(_arg0: &str, args: &[&str]) -> u8 {
     return 0;
 }
 
+fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
+    let builtins = vec!["exit", "echo", "type"];
+
+    return if let Some(command) = args.get(0) {
+        if builtins.contains(command) {
+            println!("{} is a shell {}", command.red(), "builtin".red());
+        } else if let Some(path) = get_command_path(command) {
+            println!("{} is {}", command.red(), path.into_os_string().into_string().unwrap());
+        } else {
+            println!("{} not found", command);
+        }
+
+        0
+    } else {
+        eprintln!("Usage: {} <command>", arg0);
+        1
+    }
+}
+
+fn get_command_path(command: &&str) -> Option<PathBuf> {
+    env::var_os("PATH").and_then(|paths| {
+        env::split_paths(&paths).filter_map(|dir| {
+            let full_path = dir.join(&command);
+            if full_path.is_file() {
+                Some(full_path)
+            } else {
+                None
+            }
+        }).next()
+    })
+}
+
 fn main() {
     let mut commands: HashMap<String, fn(&str, &[&str]) -> u8> = HashMap::new();
 
@@ -25,6 +58,7 @@ fn main() {
 
     commands.insert(String::from("exit"), exit);
     commands.insert(String::from("echo"), echo);
+    commands.insert(String::from("type"), type_builtin);
 
     loop {
         print!("$ ");
