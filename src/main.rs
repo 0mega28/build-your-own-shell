@@ -9,6 +9,12 @@ fn exit(_arg0: &str, args: &[&str]) -> u8 {
     process::exit(exit_code);
 }
 
+fn echo(_arg0: &str, args: &[&str]) -> u8 {
+    let output = args.join(" ");
+    println!("{}", output);
+    return 0;
+}
+
 fn main() {
     let mut commands: HashMap<String, fn(&str, &[&str]) -> u8> = HashMap::new();
 
@@ -18,6 +24,7 @@ fn main() {
     });
 
     commands.insert(String::from("exit"), exit);
+    commands.insert(String::from("echo"), echo);
 
     loop {
         print!("$ ");
