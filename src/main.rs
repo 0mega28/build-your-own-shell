@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io::{self, Write};
 use std::{env, process};
 use std::path::PathBuf;
+use std::process::Command;
 use colored::Colorize;
 
 fn exit(_arg0: &str, args: &[&str]) -> u8 {
@@ -32,7 +33,7 @@ fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
     } else {
         eprintln!("Usage: {} <command>", arg0);
         1
-    }
+    };
 }
 
 fn get_command_path(command: &&str) -> Option<PathBuf> {
@@ -46,6 +47,15 @@ fn get_command_path(command: &&str) -> Option<PathBuf> {
             }
         }).next()
     })
+}
+
+fn execute_command(arg0: &str, args: &Vec<&str>) {
+    Command::new(arg0)
+        .args(args)
+        .spawn()
+        .expect("failed to execute command")
+        .wait()
+        .expect("Failed to wait");
 }
 
 fn main() {
@@ -79,6 +89,8 @@ fn main() {
 
         if let Some(cmd) = commands.get(arg0) {
             cmd(arg0, &rest);
+        } else if let Some(_path) = get_command_path(&arg0) {
+            execute_command(arg0, &rest);
         } else {
             println!("{}: {} not found", arg0, "command".red());
         }
