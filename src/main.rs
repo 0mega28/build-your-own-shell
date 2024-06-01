@@ -33,7 +33,5 @@ fn main() {
         } else {
             println!("{}: {} not found", arg0, "command".red());
         }
-
-        dbg!(input);
     }
 }
