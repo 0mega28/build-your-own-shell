@@ -37,7 +37,8 @@ fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
 }
 
 fn pwd(_arg0: &str, _args: &[&str]) -> u8 {
-    println!("{}", env::current_dir().unwrap().into_os_string().into_string().unwrap())
+    println!("{}", env::current_dir().unwrap().into_os_string().into_string().unwrap());
+    return 0;
 }
 
 fn get_command_path(command: &&str) -> Option<PathBuf> {
