@@ -18,7 +18,7 @@ fn echo(_arg0: &str, args: &[&str]) -> u8 {
 }
 
 fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
-    let builtins = vec!["exit", "echo", "type"];
+    let builtins = vec!["exit", "echo", "type", "pwd"];
 
     return if let Some(command) = args.get(0) {
         if builtins.contains(command) {
@@ -34,6 +34,10 @@ fn type_builtin(arg0: &str, args: &[&str]) -> u8 {
         eprintln!("Usage: {} <command>", arg0);
         1
     };
+}
+
+fn pwd(_arg0: &str, _args: &[&str]) -> u8 {
+    println!("{}", env::current_dir().unwrap().into_os_string().into_string().unwrap())
 }
 
 fn get_command_path(command: &&str) -> Option<PathBuf> {
@@ -69,6 +73,7 @@ fn main() {
     commands.insert(String::from("exit"), exit);
     commands.insert(String::from("echo"), echo);
     commands.insert(String::from("type"), type_builtin);
+    commands.insert(String::from("pwd"), pwd);
 
     loop {
         print!("$ ");
