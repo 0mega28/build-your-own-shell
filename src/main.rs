@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::{env, process};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 use colored::Colorize;
 
@@ -42,8 +42,16 @@ fn pwd(_arg0: &str, _args: &[&str]) -> u8 {
 }
 
 fn cd(arg0: &str, args: &[&str]) -> u8 {
-    if let Some(path) = args.get(0) {
-        let path = Path::new(path);
+    if let Some(&path) = args.get(0) {
+        let path = match path {
+            "~" => {
+                let home_path = env::var_os("HOME")
+                    .expect("HOME variable is not set")
+                    .into();
+                home_path
+            }
+            _ => PathBuf::from(path)
+        };
         if let Err(_err) = env::set_current_dir(&path) {
             eprintln!("{}: No such {} or directory", path.to_str().unwrap(), "file".red());
             return 1;
